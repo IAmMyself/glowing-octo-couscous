@@ -10,6 +10,7 @@
 
 <body>
   <div class="center" id="btns">
+  <button id="notification" class="btn">🔔<span id="badge"></span></button>
   <button id="start" class="btn">Start Monitoring</button>
   <button id="stop" class="btn">Stop Monitoring</button>
   <button id="reset" class="btn">Reset</button>
@@ -17,8 +18,12 @@
 
   <br>
   <br>
-  
-  <div class="center" id="log"> </div>
+
+   <div id="callout">
+     <div class="center" id="notifications">
+     </div>
+  </div>
+  <div class="center" id="log"></div>
  <!--
   This script places a badge on your repl's full-browser view back to your repl's cover
   page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,

@@ -50,19 +50,96 @@ class IOTMailbox {
     const lightLevel = this.lastLightLevel >= 0 
       ? Math.random().toFixed(2) * -1 
       : Math.random().toFixed(2);
-    //console.log(`Mailbox state changed - lightLevel: ${lightLevel}`);
+    console.log(`Mailbox state changed - lightLevel: ${lightLevel}`);
     this.signalCallback(lightLevel);
     this.lastLightLevel = lightLevel;
   }
 };
 
 function handler (light) {
-	document.getElementById("log").innerHTML += `<p> Light Level: ${light}</p>`
-  console.log(`<p> Light Level: ${light}</p>`)
-  var objDiv = document.getElementById("log");
-  objDiv.scrollTop = objDiv.scrollHeight;
+  var log = document.getElementById("log"),
+    scrollLog = shouldScroll(log),
+    scrollCallout = shouldScroll(document.getElementById("callout"));
+  
+	log.innerHTML += `<p> Light Level: ${light}</p>`
+  if (light > 0 && box.lastLightLevel < 0) {
+    document.getElementById("notifications").innerHTML += `<p>Mailbox Opened</p>`
+    notify()
+  } else if (light < 0 && box.lastLightLevel > 0) {
+    document.getElementById("notifications").innerHTML += `<p>Mailbox Closed</p>`
+    notify()
+  }
+
+  scrollPosition(log, scrollLog)
+  scrollPosition(document.getElementById("callout"), scrollCallout);
+    
 }
 
-var box = new IOTMailbox(500, handler);
+function notify () {
+  var badge = document.getElementById("badge")
 
-box.startMonitoring();
+  if (parseInt(badge.innerHTML)) {
+    badge.innerHTML = parseInt(badge.innerHTML) + 1
+  } else {
+    badge.innerHTML = 1
+  }
+  badge.style.display = "inline"
+}
+
+function shouldScroll (element) {
+  return Math.floor(element.scrollTop + element.clientHeight) + 1 >= element.scrollHeight;
+}
+
+function scrollPosition (element, scroll) {
+
+   if (scroll) {
+    element.scrollTop = element.scrollHeight;
+   }
+}
+
+var box = new IOTMailbox(500, handler),
+  visible = true,
+  start = true;
+  stop = false;
+
+document.getElementById("notification").addEventListener("click", () => {
+  if (visible) {
+    document.getElementById("callout").style.display = "block";
+    document.getElementById("badge").innerHTML = "";
+    document.getElementById("badge").style.display = "none";
+  } else {
+    document.getElementById("callout").style.display = "none"
+  }
+  visible = !visible;
+});
+
+document.getElementById("start").addEventListener("click", () => {
+  if (start) {
+    box.startMonitoring();
+    document.getElementById("start").style.background = "lightgrey";
+    document.getElementById("stop").style.background = "#ff2e2e";
+    start = false;
+    stop = true;
+  }
+});
+
+
+document.getElementById("stop").addEventListener("click", () => {
+  if (stop) {
+    box.stopMonitoring();
+    document.getElementById("start").style.background = "#29ff29";
+    document.getElementById("stop").style.background = "lightgrey";
+    stop = false;
+    start = true;
+  };
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  document.getElementById("log").innerHTML = "";
+  document.getElementById("notifications").innerHTML = "";
+  document.getElementById("badge").innerHTML = "";
+  document.getElementById("badge").style.display = "none";
+  document.getElementById("start").style.background = "#29ff29";
+  document.getElementById("stop").style.background = "lightgrey";
+  box.stopMonitoring();
+});
